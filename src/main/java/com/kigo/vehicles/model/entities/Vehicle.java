@@ -1,6 +1,6 @@
 package com.kigo.vehicles.model.entities;
 
-public abstract class Vehicle {
+public abstract class Vehicle implements IViewable {
     private final int x;
     private final int y;
     private final int width;
