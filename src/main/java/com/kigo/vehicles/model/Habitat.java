@@ -1,5 +1,6 @@
 package com.kigo.vehicles.model;
 
+import com.kigo.vehicles.model.dto.HabitatParams;
 import com.kigo.vehicles.model.entities.Automobile;
 import com.kigo.vehicles.model.entities.Motorbike;
 import com.kigo.vehicles.model.factories.AutomobileFactory;
@@ -32,9 +33,14 @@ public class Habitat {
         this.height = height;
     }
 
-    public void start() {
+    public void start(HabitatParams params) {
         view.getChildren().clear();
         startTime = System.currentTimeMillis();
+
+        this.vehicleSpawners = new IVehicleSpawner[]{
+                new ProbabilisticSpawner(vehicleRepository, new AutomobileFactory(this.width, this.height), view, params.automobileParams()),
+                new ProbabilisticSpawner(vehicleRepository, new MotorbikeFactory(this.width, this.height), view, params.motorbikeParams()),
+        };
     }
 
     public void stop() {
@@ -43,7 +49,7 @@ public class Habitat {
 
     public void update(long timeOffset) throws OutOfSpace {
         for (IVehicleSpawner spawner : this.vehicleSpawners) {
-                spawner.trySpawn(timeOffset);
+            spawner.trySpawn(timeOffset);
         }
 
         timeLabelText.set("time: " + new DecimalFormat("0.0").format((double) (System.currentTimeMillis() - startTime) / 1000));
@@ -54,14 +60,8 @@ public class Habitat {
         );
     }
 
-    public void setView(Pane view, Label timeLabel, Label vehiclesInfo) {
+    public void setView(Pane view, Label timeLabel) {
         this.view = view;
-
-        this.vehicleSpawners = new IVehicleSpawner[]{
-                new ProbabilisticSpawner(vehicleRepository, new AutomobileFactory(this.width, this.height), view, 2000, 0.5f),
-                new ProbabilisticSpawner(vehicleRepository, new MotorbikeFactory(this.width, this.height), view, 3000, 0.7f),
-        };
         timeLabel.textProperty().bind(timeLabelText);
-        vehiclesInfo.textProperty().bind(vehiclesInfoText);
     }
 }

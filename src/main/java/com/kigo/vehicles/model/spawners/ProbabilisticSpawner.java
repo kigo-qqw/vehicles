@@ -14,23 +14,21 @@ public class ProbabilisticSpawner implements IVehicleSpawner {
 
     private final IVehicleFactory vehicleFactory;
     private final Pane view;
-    private final int N;
-    private final double P;
+    private final ProbabilisticSpawnerParams params;
     private long lastSpawnAttempt = 0;
     private final Random random = new Random();
 
-    public ProbabilisticSpawner(IVehicleRepository vehicleRepository, IVehicleFactory vehicleFactory, Pane view, int N, double P) {
+    public ProbabilisticSpawner(IVehicleRepository vehicleRepository, IVehicleFactory vehicleFactory, Pane view, ProbabilisticSpawnerParams params) {
         this.vehicleRepository = vehicleRepository;
         this.vehicleFactory = vehicleFactory;
         this.view = view;
-        this.N = N;
-        this.P = P;
+        this.params = params;
     }
 
     @Override
     public void trySpawn(long timeOffset) throws OutOfSpace {
-        if (timeOffset - this.lastSpawnAttempt > N) {
-            if (random.nextFloat(0, 1) < P) {
+        if (timeOffset - this.lastSpawnAttempt > params.period()) {
+            if (random.nextFloat(0, 1) < params.probability()) {
                 Vehicle vehicle = vehicleFactory.makeVehicle();
                 vehicleRepository.tryAdd(vehicle);
 

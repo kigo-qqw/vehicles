@@ -31,7 +31,6 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
-        System.out.println(javafx.scene.text.Font.getFamilies());
         launch();
     }
 }

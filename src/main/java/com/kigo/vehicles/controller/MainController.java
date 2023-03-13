@@ -1,32 +1,52 @@
 package com.kigo.vehicles.controller;
 
 import com.kigo.vehicles.model.Habitat;
+import com.kigo.vehicles.model.dto.HabitatParams;
 import com.kigo.vehicles.model.repositories.OutOfSpace;
+import com.kigo.vehicles.model.spawners.ProbabilisticSpawnerParams;
+import com.kigo.vehicles.view.components.NumberField;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import javafx.stage.WindowEvent;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.IntStream;
 
 public class MainController {
     @FXML
-    private Pane root;
-    @FXML
-    private VBox labels;
-    @FXML
     private Label timeLabel;
     @FXML
-    private Label vehiclesInfo;
+    private ToggleButton showStatButton;
+    @FXML
+    private RadioButton showTimeRadioButton;
+    @FXML
+    private RadioButton dontShowTimeRadioButton;
+    @FXML
+    private NumberField automobilePeriod;
+    @FXML
+    private ComboBox<Number> automobileProbability;
+    @FXML
+    private NumberField motorbikePeriod;
+    @FXML
+    private ComboBox<Number> motorbikeProbability;
+    @FXML
+    private Button startButton;
+    @FXML
+    private Button stopButton;
+    @FXML
+    private Pane root;
     @FXML
     private ImageView popup;
     private final Habitat model;
     private Timer timer = null;
-    private boolean isShowLabels = true;
+    private final BooleanProperty showTimeProperty = new SimpleBooleanProperty(true);
+    private final BooleanProperty showStatisticProperty = new SimpleBooleanProperty(true);
 
     public MainController(Habitat model) {
         this.model = model;
@@ -35,7 +55,18 @@ public class MainController {
     private void start() {
         popup.setVisible(false);
         stop();
-        this.model.start();
+        this.model.start(
+                new HabitatParams(
+                        new ProbabilisticSpawnerParams(
+                                Integer.parseInt(automobilePeriod.getText()),
+                                automobileProbability.getValue().doubleValue() / 100
+                        ),
+                        new ProbabilisticSpawnerParams(
+                                Integer.parseInt(motorbikePeriod.getText()),
+                                motorbikeProbability.getValue().doubleValue() / 100
+                        )
+                )
+        );
         timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
@@ -61,12 +92,11 @@ public class MainController {
     }
 
     private void toggle() {
-        isShowLabels = !isShowLabels;
-        labels.setVisible(isShowLabels);
+        showTimeProperty.set(!showTimeProperty.get());
     }
 
     public void adjustView(WindowEvent ignoredWindowEvent) {
-        model.setView(root, timeLabel, vehiclesInfo);
+        model.setView(root, timeLabel);
         root.getScene().setOnKeyReleased(keyEvent -> {
             switch (keyEvent.getCode()) {
                 case B -> start();
@@ -74,5 +104,33 @@ public class MainController {
                 case T -> toggle();
             }
         });
+        startButton.setOnAction(actionEvent -> {
+            startButton.setDisable(true);
+            stopButton.setDisable(false);
+            start();
+        });
+        stopButton.setOnAction(actionEvent -> {
+            stopButton.setDisable(true);
+            startButton.setDisable(false);
+            stop();
+        });
+
+        showTimeRadioButton.setOnAction(actionEvent -> showTimeProperty.set(true));
+        dontShowTimeRadioButton.setOnAction(actionEvent -> showTimeProperty.set(false));
+        showTimeProperty.addListener(observable -> {
+            boolean showTime = showTimeProperty.get();
+            showTimeRadioButton.setSelected(showTime);
+            dontShowTimeRadioButton.setSelected(!showTime);
+        });
+
+        showStatButton.selectedProperty().bindBidirectional(showStatisticProperty);
+
+        motorbikeProbability.getItems().setAll(IntStream.rangeClosed(0, 10).map(element -> 10 * element).boxed().toList());
+        motorbikeProbability.setValue(100);
+
+        automobileProbability.getItems().setAll(IntStream.rangeClosed(0, 10).map(element -> 10 * element).boxed().toList());
+        automobileProbability.setValue(100);
+
+        timeLabel.visibleProperty().bind(showTimeProperty);
     }
 }

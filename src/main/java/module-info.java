@@ -5,5 +5,6 @@ module com.kigo.vehicles {
 
     opens com.kigo.vehicles to javafx.fxml;
     opens com.kigo.vehicles.controller to javafx.fxml;
+    opens com.kigo.vehicles.view.components to javafx.fxml;
     exports com.kigo.vehicles;
 }
