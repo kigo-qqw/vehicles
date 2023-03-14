@@ -3,6 +3,7 @@ package com.kigo.vehicles.model.repositories;
 import com.kigo.vehicles.model.entities.Vehicle;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public class FixedArrayVehicleRepository implements IVehicleRepository {
@@ -23,7 +24,7 @@ public class FixedArrayVehicleRepository implements IVehicleRepository {
 
     @Override
     public Stream<Vehicle> getAll() {
-        return Arrays.stream(vehicles);
+        return Arrays.stream(vehicles).filter(Objects::nonNull);
     }
 
     @Override

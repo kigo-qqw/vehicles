@@ -6,6 +6,7 @@ import com.kigo.vehicles.model.Habitat;
 import com.kigo.vehicles.model.repositories.FixedArrayVehicleRepository;
 import com.kigo.vehicles.model.repositories.IVehicleRepository;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -19,7 +20,7 @@ public class Main extends Application {
         Habitat model = new Habitat(vehicleRepository, 800, 800);
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/kigo/vehicles/fxml/main-view.fxml"));
-        fxmlLoader.setControllerFactory(controllerClass -> new MainControllerFactory().getMainController(model));
+        fxmlLoader.setControllerFactory(controllerClass -> new MainControllerFactory().getMainController(stage, model));
 
         Scene scene = new Scene(fxmlLoader.load(), 800, 800);
 
@@ -27,6 +28,12 @@ public class Main extends Application {
         stage.setOnShown(controller::adjustView);
         stage.setTitle("Hello!");
         stage.setScene(scene);
+
+        stage.setOnCloseRequest(t -> {
+            Platform.exit();
+            System.exit(0);
+        });
+
         stage.show();
     }
 

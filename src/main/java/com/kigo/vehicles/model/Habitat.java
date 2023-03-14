@@ -1,8 +1,6 @@
 package com.kigo.vehicles.model;
 
 import com.kigo.vehicles.model.dto.HabitatParams;
-import com.kigo.vehicles.model.entities.Automobile;
-import com.kigo.vehicles.model.entities.Motorbike;
 import com.kigo.vehicles.model.factories.AutomobileFactory;
 import com.kigo.vehicles.model.factories.MotorbikeFactory;
 import com.kigo.vehicles.model.repositories.IVehicleRepository;
@@ -23,7 +21,6 @@ public class Habitat {
     private Pane view;
     private long startTime = 0;
     private final StringProperty timeLabelText = new SimpleStringProperty("time: 0");
-    private final StringProperty vehiclesInfoText = new SimpleStringProperty("motorbikes: 0\nautomobiles: 0");
     private final int width;
     private final int height;
 
@@ -53,15 +50,14 @@ public class Habitat {
         }
 
         timeLabelText.set("time: " + new DecimalFormat("0.0").format((double) (System.currentTimeMillis() - startTime) / 1000));
-        vehiclesInfoText.set("motorbikes: "
-                + vehicleRepository.getAll().filter(vehicle -> vehicle instanceof Motorbike).count()
-                + "\nautomobiles: "
-                + vehicleRepository.getAll().filter(vehicle -> vehicle instanceof Automobile).count()
-        );
     }
 
     public void setView(Pane view, Label timeLabel) {
         this.view = view;
         timeLabel.textProperty().bind(timeLabelText);
+    }
+
+    public IVehicleRepository getVehicleRepository() {
+        return vehicleRepository;
     }
 }

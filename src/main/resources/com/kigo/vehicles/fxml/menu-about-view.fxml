@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
+
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<VBox xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.kigo.vehicles.controller.MenuAboutController">
+    <ImageView><Image url="@../images/mmm.jpg"/></ImageView>
+    <Button onAction="#close" text="close"/>
+</VBox>
+
+
