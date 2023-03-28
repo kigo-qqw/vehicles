@@ -1,0 +1,4 @@
+plugins {
+    id 'ru.nstu.vehicles.java-common-conventions'
+    id 'java-library'
+}
