@@ -9,6 +9,5 @@
 
 rootProject.name = 'vehicles'
 include 'app'
-include 'list'
-include 'utilities'
+
 
