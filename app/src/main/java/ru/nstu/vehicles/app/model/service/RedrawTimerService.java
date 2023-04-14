@@ -2,20 +2,34 @@ package ru.nstu.vehicles.app.model.service;
 
 import javafx.application.Platform;
 import ru.nstu.vehicles.app.model.Habitat;
+import ru.nstu.vehicles.app.model.repository.IVehicleRepository;
+import ru.nstu.vehicles.app.view.components.IHabitatView;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class TimerService implements ITimerService {
-    private Habitat habitat;
+public class RedrawTimerService implements IRedrawTimerService {
+    private IHabitatView habitatView;
+    private IVehicleRepository vehicleRepository;
+    private IVehicleService vehicleService;
     private long simulationTime;
     private Timer timer;
     private final int PERIOD = 10;
 
-    @Override
-    public void setHabitat(Habitat habitat) {
-        this.habitat = habitat;
+    public RedrawTimerService(IVehicleRepository vehicleRepository, IVehicleService vehicleService) {
+        this.vehicleRepository = vehicleRepository;
+        this.vehicleService = vehicleService;
     }
+
+    @Override
+    public void setView(IHabitatView habitatView) {
+        this.habitatView = habitatView;
+    }
+
+//    @Override
+//    public void setVehicleRepository(IVehicleRepository vehicleRepository) {
+//        this.vehicleRepository = vehicleRepository;
+//    }
 
     @Override
     public void start() {
@@ -50,10 +64,10 @@ public class TimerService implements ITimerService {
     private class UpdateTask extends TimerTask {
         @Override
         public void run() {
-            Platform.runLater(() -> {
+//            Platform.runLater(() -> {
                 simulationTime += PERIOD;
-                habitat.update(simulationTime);
-            });
+                habitatView.update(vehicleRepository.getAll().map(vehicle -> vehicleService.get(vehicle)).toList());
+//            });
         }
     }
 }
