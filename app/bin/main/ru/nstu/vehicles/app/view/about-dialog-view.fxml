@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.control.Button?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="ru.nstu.vehicles.app.controller.AboutDialogWindowController"
+      prefHeight="400.0" prefWidth="600.0">
+
+    <ImageView><Image url="@./images/about.jpg"/></ImageView>
+    <Button fx:id="closeButton" text="close"/>
+
+</VBox>
+
+

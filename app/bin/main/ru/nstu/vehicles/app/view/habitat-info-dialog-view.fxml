@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.Button?>
+
+
+<?import ru.nstu.vehicles.app.view.components.TimeView?>
+<?import javafx.scene.control.Label?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="ru.nstu.vehicles.app.controller.HabitatInfoDialogWindowController"
+      prefHeight="400.0" prefWidth="600.0">
+
+    <TimeView fx:id="timeView"/>
+    <Label fx:id="automobileCountLabel"/>
+    <Label fx:id="motorbikeCountLabel"/>
+
+    <TableView fx:id="tableView">
+        <columns>
+            <TableColumn fx:id="birthTimeTableColumn" text="Birthtime"/>
+            <TableColumn fx:id="typeTableColumn" text="Type"/>
+            <TableColumn fx:id="uuidTableColumn" text="UUID"/>
+            <TableColumn fx:id="lifeTimeTableColumn" text="Lifetime"/>
+            <TableColumn fx:id="xTableColumn" text="X"/>
+            <TableColumn fx:id="yTableColumn" text="Y"/>
+        </columns>
+    </TableView>
+
+    <Button fx:id="resumeButton" text="resume"/>
+    <Button fx:id="stopButton" text="stop"/>
+
+</VBox>
+
