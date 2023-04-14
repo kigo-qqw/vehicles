@@ -24,7 +24,10 @@ public class AutomobileFactory implements IVehicleFactory {
         return new Automobile(
                 this.random.nextInt(0, this.width),
                 this.random.nextInt(0, this.height),
-                this.timerService.getSimulationTime(), this.lifeTime
+                this.random.nextDouble(1, 2),
+                0,
+                this.timerService.getSimulationTime(), this.lifeTime,
+                this.width, this.height
         );
     }
 }

@@ -7,8 +7,11 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import ru.nstu.vehicles.app.controller.MainViewController;
 import ru.nstu.vehicles.app.model.Habitat;
+import ru.nstu.vehicles.app.model.repository.IVehicleRepository;
 import ru.nstu.vehicles.app.model.repository.VehicleRepository;
-import ru.nstu.vehicles.app.model.service.TimerService;
+import ru.nstu.vehicles.app.model.service.IVehicleService;
+import ru.nstu.vehicles.app.model.service.RedrawTimerService;
+import ru.nstu.vehicles.app.model.service.SpawnTimerService;
 import ru.nstu.vehicles.app.model.service.VehicleService;
 
 import java.io.IOException;
@@ -20,12 +23,16 @@ public class App extends Application {
         Scene scene = new Scene(fxmlLoader.load(), 1080, 720);
 
         MainViewController controller = fxmlLoader.getController();
+
+        IVehicleRepository vehicleRepository = new VehicleRepository();
+        IVehicleService vehicleService = new VehicleService();
         Habitat model = new Habitat(
                 controller.getHabitatView(),
                 controller.getTimeView(),
-                new VehicleRepository(),
-                new VehicleService(),
-                new TimerService()
+                vehicleRepository,
+                vehicleService,
+                new RedrawTimerService(vehicleRepository, vehicleService),
+                new SpawnTimerService(vehicleRepository)
         );
         controller.setModel(model);
         controller.setStage(primaryStage);

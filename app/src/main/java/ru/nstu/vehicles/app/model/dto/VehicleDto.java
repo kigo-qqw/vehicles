@@ -6,7 +6,8 @@ import ru.nstu.vehicles.app.model.entities.Vehicle;
 
 import java.util.UUID;
 
-public record VehicleDto(UUID uuid, int x, int y, long birthTime, long lifeTime, Type type) {
+public record VehicleDto(UUID uuid, double x, double y, double dx, double xy, long birthTime, long lifeTime,
+                         Type type) {
     public enum Type {
         UNKNOWN, MOTORBIKE, AUTOMOBILE;
 

@@ -1,21 +1,20 @@
 package ru.nstu.vehicles.app.model.service.ais;
 
 
+import ru.nstu.vehicles.app.model.entities.Automobile;
+import ru.nstu.vehicles.app.model.entities.Vehicle;
+import ru.nstu.vehicles.app.model.repository.IVehicleRepository;
+
 public class AutomobileAI extends BaseAI {
-    @Override
-    public void run() {
-        while (true) {
-            try {
-                Thread.sleep(1000);
+    private final IVehicleRepository vehicleRepository;
 
-                synchronized (this) {
-                    while (isSuspended())
-                        wait();
-                }
+    public AutomobileAI(IVehicleRepository vehicleRepository) {
+        this.vehicleRepository = vehicleRepository;
+    }
 
-                System.out.println("AutomobileAI work");
-            } catch (InterruptedException e) {
-            }
+    public void update() {
+        synchronized (this.vehicleRepository) {
+            this.vehicleRepository.getAll().filter(vehicle -> vehicle instanceof Automobile).forEach(Vehicle::move);
         }
     }
 }

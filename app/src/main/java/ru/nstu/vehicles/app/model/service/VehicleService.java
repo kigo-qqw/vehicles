@@ -9,6 +9,8 @@ public class VehicleService implements IVehicleService {
                 vehicle.getUuid(),
                 vehicle.getX(),
                 vehicle.getY(),
+                vehicle.getDx(),
+                vehicle.getDy(),
                 vehicle.getBirthTime(),
                 vehicle.getLifeTime(),
                 VehicleDto.Type.fromVehicle(vehicle)

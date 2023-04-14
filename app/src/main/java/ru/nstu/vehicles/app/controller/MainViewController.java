@@ -8,6 +8,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import ru.nstu.vehicles.app.model.Habitat;
 import ru.nstu.vehicles.app.model.dto.VehicleDto;
+import ru.nstu.vehicles.app.model.entities.Automobile;
+import ru.nstu.vehicles.app.model.entities.Motorbike;
 import ru.nstu.vehicles.app.model.entities.factories.AutomobileFactory;
 import ru.nstu.vehicles.app.model.entities.factories.MotorbikeFactory;
 import ru.nstu.vehicles.app.model.service.IVehicleSpawnerService;
@@ -23,6 +25,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class MainViewController implements IController {
@@ -58,6 +61,14 @@ public class MainViewController implements IController {
     private HabitatView habitatView;
     @FXML
     private TimeView timeView;
+    @FXML
+    private CheckBox automobileAICheckBox;
+    @FXML
+    private CheckBox motorbikeAICheckBox;
+    @FXML
+    private ComboBox<Integer> automobileAIThreadPriorityComboBox;
+    @FXML
+    private ComboBox<Integer> motorbikeAIThreadPriorityComboBox;
     private Habitat model = null;
     private final BooleanProperty isSimulationActive = new SimpleBooleanProperty(false);
     private final BooleanProperty isShowTime = new SimpleBooleanProperty(true);
@@ -69,7 +80,7 @@ public class MainViewController implements IController {
 
         vehicleSpawnerServices.add(new ProbabilisticVehicleSpawnerService(
                 new AutomobileFactory(
-                        this.model.getTimerService(),
+                        this.model.getSpawnTimerService(),
                         this.automobileParams.getLifeTime(),
                         640, 480),
                 this.automobileParams.getPeriod(),
@@ -77,7 +88,7 @@ public class MainViewController implements IController {
 
         vehicleSpawnerServices.add(new ProbabilisticVehicleSpawnerService(
                 new MotorbikeFactory(
-                        this.model.getTimerService(),
+                        this.model.getSpawnTimerService(),
                         this.motorbikeParams.getLifeTime(),
                         640, 480),
                 this.motorbikeParams.getPeriod(),
@@ -154,6 +165,31 @@ public class MainViewController implements IController {
         });
 
         this.timeView.visibleProperty().bind(this.isShowTime);
+
+        this.automobileAICheckBox.setOnAction(event -> {
+            System.out.println("automobileAICheckBox: " + this.automobileAICheckBox.isSelected());
+            if (this.automobileAICheckBox.isSelected()) this.model.resumeAI(Automobile.class);
+            else this.model.pauseAI(Automobile.class);
+        });
+        this.motorbikeAICheckBox.setOnAction(event -> {
+            if (this.motorbikeAICheckBox.isSelected()) this.model.resumeAI(Motorbike.class);
+            else this.model.pauseAI(Motorbike.class);
+        });
+
+        this.automobileAIThreadPriorityComboBox.getItems().setAll(IntStream.rangeClosed(1, 10).boxed().toList());
+        this.automobileAIThreadPriorityComboBox.setOnAction(
+                event -> this.model.setAIPriority(
+                        Automobile.class,
+                        this.automobileAIThreadPriorityComboBox.getValue()
+                )
+        );
+        this.motorbikeAIThreadPriorityComboBox.getItems().setAll(IntStream.rangeClosed(1, 10).boxed().toList());
+        this.motorbikeAIThreadPriorityComboBox.setOnAction(
+                event -> this.model.setAIPriority(
+                        Motorbike.class,
+                        this.motorbikeAIThreadPriorityComboBox.getValue()
+                )
+        );
     }
 
     public HabitatView getHabitatView() {
@@ -175,4 +211,6 @@ public class MainViewController implements IController {
     public TimeView getTimeView() {
         return this.timeView;
     }
+
+
 }

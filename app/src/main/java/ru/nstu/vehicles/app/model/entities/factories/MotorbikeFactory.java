@@ -24,7 +24,10 @@ public class MotorbikeFactory implements IVehicleFactory {
         return new Motorbike(
                 this.random.nextInt(0, this.width),
                 this.random.nextInt(0, this.height),
-                this.timerService.getSimulationTime(), this.lifeTime
+                0,
+                this.random.nextDouble(1, 2),
+                this.timerService.getSimulationTime(), this.lifeTime,
+                this.width,this.height
         );
     }
 }

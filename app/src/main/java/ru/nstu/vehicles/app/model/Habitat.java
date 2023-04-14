@@ -1,7 +1,9 @@
 package ru.nstu.vehicles.app.model;
 
 import ru.nstu.vehicles.app.model.dto.VehicleDto;
-import ru.nstu.vehicles.app.model.repository.IRepository;
+import ru.nstu.vehicles.app.model.entities.Automobile;
+import ru.nstu.vehicles.app.model.entities.Motorbike;
+import ru.nstu.vehicles.app.model.entities.Vehicle;
 import ru.nstu.vehicles.app.model.repository.IVehicleRepository;
 import ru.nstu.vehicles.app.model.service.*;
 import ru.nstu.vehicles.app.model.service.ais.AutomobileAI;
@@ -10,69 +12,84 @@ import ru.nstu.vehicles.app.view.components.IHabitatView;
 import ru.nstu.vehicles.app.view.components.ITimeView;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class Habitat {
     private final IHabitatView view;
     private final ITimeView timeView;
     private final IVehicleRepository vehicleRepository;
-    private List<IVehicleSpawnerService> vehicleSpawnerServices;
     private final IVehicleService vehicleService;
-    private final ITimerService timerService;
+    private final IRedrawTimerService redrawTimerService;
+    private final ISpawnTimerService spawnTimerService;
+
     private final IAIService aiService;
-    public Habitat(IHabitatView view, ITimeView timeView, IVehicleRepository vehicleRepository, IVehicleService vehicleService, ITimerService timerService) {
+
+    public Habitat(
+            IHabitatView view,
+            ITimeView timeView,
+            IVehicleRepository vehicleRepository,
+            IVehicleService vehicleService,
+            IRedrawTimerService redrawTimerService,
+            ISpawnTimerService spawnTimerService
+    ) {
         this.view = view;
         this.timeView = timeView;
         this.vehicleRepository = vehicleRepository;
         this.vehicleService = vehicleService;
-        this.timerService = timerService;
-        this.timerService.setHabitat(this);
+
+        this.redrawTimerService = redrawTimerService;
+        this.spawnTimerService = spawnTimerService;
 
         this.aiService = new AIService();
-        this.aiService.use(AutomobileAI.class, new AutomobileAI());
-        this.aiService.use(MotorbikeAI.class, new MotorbikeAI());
+        this.aiService.use(Automobile.class, new AutomobileAI(this.vehicleRepository));
+        this.aiService.use(Motorbike.class, new MotorbikeAI(this.vehicleRepository));
     }
 
     public void start(List<IVehicleSpawnerService> vehicleSpawnerServices) {
-        this.vehicleSpawnerServices = vehicleSpawnerServices;
 
-        this.timerService.start();
-        this.aiService.resume(AutomobileAI.class);
+        this.spawnTimerService.setVehicleSpawnerServices(vehicleSpawnerServices);
+        this.redrawTimerService.setView(view);
+
+        this.spawnTimerService.start();
+        this.redrawTimerService.start();
+
+        this.aiService.resume(Automobile.class);
+        this.aiService.resume(Motorbike.class);
     }
 
     public void stop() {
-        this.vehicleRepository.deleteALl();
+        synchronized (this.vehicleRepository) {
+            this.vehicleRepository.deleteALl();
+        }
         this.view.deleteAll();
-        this.timerService.stop();
-        this.aiService.pause(AutomobileAI.class);
+
+        this.spawnTimerService.stop();
+        this.redrawTimerService.stop();
+
+        this.aiService.pause(Automobile.class);
+        this.aiService.pause(Motorbike.class);
     }
 
     public void pause() {
-        this.timerService.pause();
-        this.aiService.pause(AutomobileAI.class);
+        this.spawnTimerService.pause();
+        this.redrawTimerService.pause();
+
+        this.aiService.pause(Automobile.class);
+        this.aiService.pause(Motorbike.class);
     }
 
     public void resume() {
-        this.timerService.resume();
-        this.aiService.resume(AutomobileAI.class);
+        this.spawnTimerService.resume();
+        this.redrawTimerService.resume();
+
+        this.aiService.resume(Automobile.class);
+        this.aiService.resume(Motorbike.class);
     }
 
     public void update(long timeOffset) {
-        this.vehicleSpawnerServices
-                .stream()
-                .map(service -> service.trySpawn(timeOffset))
-                .filter(Optional::isPresent)
-                .forEach(vehicle -> {
-                    try {
-                        vehicleRepository.tryAdd(vehicle.get());
-                    } catch (IRepository.OutOfSpaceException e) {
-                        stop();
-                    }
-//                    view.addVehicle(vehicleService.get(vehicle.get()));
-                });
-        this.vehicleRepository.update(timeOffset);
-        this.view.update(this.vehicleRepository.getAll().map(this.vehicleService::get).toList());
+        synchronized (this.vehicleRepository) {
+            this.view.update(this.vehicleRepository.getAll().map(this.vehicleService::get).toList());
+        }
         this.timeView.setTime(timeOffset);
     }
 
@@ -80,7 +97,21 @@ public class Habitat {
         return this.vehicleRepository.getAll().map(this.vehicleService::get);
     }
 
-    public ITimerService getTimerService() {
-        return this.timerService;
+    public ITimerService getSpawnTimerService() {
+        return this.spawnTimerService;
+    }
+
+    public <T extends Vehicle> void resumeAI(Class<T> type) {
+        System.out.println("resume: " + type);
+        this.aiService.resume(type);
+    }
+
+    public <T extends Vehicle> void pauseAI(Class<T> type) {
+        System.out.println("pause: " + type);
+        this.aiService.pause(type);
+    }
+
+    public <T extends Vehicle> void setAIPriority(Class<T> type, int priority) {
+        this.aiService.setPriority(type, priority);
     }
 }

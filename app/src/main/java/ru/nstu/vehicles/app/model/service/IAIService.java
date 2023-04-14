@@ -1,10 +1,14 @@
 package ru.nstu.vehicles.app.model.service;
 
+import ru.nstu.vehicles.app.model.entities.Vehicle;
 import ru.nstu.vehicles.app.model.service.ais.BaseAI;
 
 public interface IAIService {
-    <AI extends BaseAI>void use(Class<AI> type, AI ai);
-    <AI extends BaseAI>void pause(Class<AI> type);
-    <AI extends BaseAI>void resume(Class<AI> type);
+    <T extends Vehicle, AI extends BaseAI> void use(Class<T> type, AI ai);
 
+    <T extends Vehicle> void pause(Class<T> type);
+
+    <T extends Vehicle> void resume(Class<T> type);
+
+    <T extends Vehicle> void setPriority(Class<T> type, int priority);
 }

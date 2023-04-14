@@ -52,6 +52,11 @@
                                                 lifeTime="8000"
                                                 period="1000"
                                                 chance="100"/>
+
+            <CheckBox fx:id="automobileAICheckBox" text="Automobile AI" selected="true"/>
+            <ComboBox fx:id="automobileAIThreadPriorityComboBox"/>
+            <CheckBox fx:id="motorbikeAICheckBox" text="Motorbike AI" selected="true"/>
+            <ComboBox fx:id="motorbikeAIThreadPriorityComboBox"/>
         </VBox>
     </HBox>
 
