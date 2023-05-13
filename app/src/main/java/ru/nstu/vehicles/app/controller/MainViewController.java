@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -74,6 +75,11 @@ public class MainViewController implements IController {
     private final BooleanProperty isShowTime = new SimpleBooleanProperty(true);
     private final BooleanProperty isShowInfoModal = new SimpleBooleanProperty(true);
     private Stage stage;
+    private final Properties appConfig;
+
+    public MainViewController(Properties appConfig) {
+        this.appConfig = appConfig;
+    }
 
     public void startSimulation() {
         List<IVehicleSpawnerService> vehicleSpawnerServices = new ArrayList<>();
@@ -85,6 +91,9 @@ public class MainViewController implements IController {
                         640, 480),
                 this.automobileParams.getPeriod(),
                 (double) this.automobileParams.getChance() / 100));
+        this.appConfig.setProperty("vehicle.automobile.spawnPeriod", String.valueOf(this.automobileParams.getPeriod()));
+        this.appConfig.setProperty("vehicle.automobile.lifeTime", String.valueOf(this.automobileParams.getLifeTime()));
+        this.appConfig.setProperty("vehicle.automobile.spawnProbability", String.valueOf(this.automobileParams.getChance()));
 
         vehicleSpawnerServices.add(new ProbabilisticVehicleSpawnerService(
                 new MotorbikeFactory(
@@ -93,9 +102,13 @@ public class MainViewController implements IController {
                         640, 480),
                 this.motorbikeParams.getPeriod(),
                 (double) this.motorbikeParams.getChance() / 100));
+        this.appConfig.setProperty("vehicle.motorbike.spawnPeriod", String.valueOf(this.motorbikeParams.getPeriod()));
+        this.appConfig.setProperty("vehicle.motorbike.lifeTime", String.valueOf(this.motorbikeParams.getLifeTime()));
+        this.appConfig.setProperty("vehicle.motorbike.spawnProbability", String.valueOf(this.motorbikeParams.getChance()));
 
         this.isSimulationActive.set(true);
 
+        System.out.println(this.appConfig);
         this.model.start(vehicleSpawnerServices);
     }
 
@@ -170,10 +183,14 @@ public class MainViewController implements IController {
             System.out.println("automobileAICheckBox: " + this.automobileAICheckBox.isSelected());
             if (this.automobileAICheckBox.isSelected()) this.model.resumeAI(Automobile.class);
             else this.model.pauseAI(Automobile.class);
+
+            this.appConfig.setProperty("vehicle.automobile.uesAI", String.valueOf(this.automobileAICheckBox.isSelected()));
         });
         this.motorbikeAICheckBox.setOnAction(event -> {
             if (this.motorbikeAICheckBox.isSelected()) this.model.resumeAI(Motorbike.class);
             else this.model.pauseAI(Motorbike.class);
+
+            this.appConfig.setProperty("vehicle.motorbike.uesAI", String.valueOf(this.motorbikeAICheckBox.isSelected()));
         });
 
         this.automobileAIThreadPriorityComboBox.getItems().setAll(IntStream.rangeClosed(1, 10).boxed().toList());
@@ -190,6 +207,15 @@ public class MainViewController implements IController {
                         this.motorbikeAIThreadPriorityComboBox.getValue()
                 )
         );
+
+        this.automobileParams.setPeriod(Integer.parseInt(this.appConfig.getProperty("vehicle.automobile.spawnPeriod")));
+        this.automobileParams.setLifeTime(Integer.parseInt(this.appConfig.getProperty("vehicle.automobile.lifeTime")));
+        this.automobileParams.setChance(Integer.parseInt(this.appConfig.getProperty("vehicle.automobile.spawnProbability")));
+        this.automobileAICheckBox.setSelected(Boolean.parseBoolean(this.appConfig.getProperty("vehicle.automobile.spawnProbability")));
+        this.motorbikeParams.setPeriod(Integer.parseInt(this.appConfig.getProperty("vehicle.motorbike.spawnPeriod")));
+        this.motorbikeParams.setLifeTime(Integer.parseInt(this.appConfig.getProperty("vehicle.motorbike.lifeTime")));
+        this.motorbikeParams.setChance(Integer.parseInt(this.appConfig.getProperty("vehicle.motorbike.spawnProbability")));
+        this.motorbikeAICheckBox.setSelected(Boolean.parseBoolean(this.appConfig.getProperty("vehicle.motorbike.spawnProbability")));
     }
 
     public HabitatView getHabitatView() {

@@ -12,6 +12,7 @@ import ru.nstu.vehicles.app.view.components.IHabitatView;
 import ru.nstu.vehicles.app.view.components.ITimeView;
 
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Stream;
 
 public class Habitat {
@@ -21,8 +22,8 @@ public class Habitat {
     private final IVehicleService vehicleService;
     private final IRedrawTimerService redrawTimerService;
     private final ISpawnTimerService spawnTimerService;
-
     private final IAIService aiService;
+    private final Properties appConfig;
 
     public Habitat(
             IHabitatView view,
@@ -30,7 +31,8 @@ public class Habitat {
             IVehicleRepository vehicleRepository,
             IVehicleService vehicleService,
             IRedrawTimerService redrawTimerService,
-            ISpawnTimerService spawnTimerService
+            ISpawnTimerService spawnTimerService,
+            Properties appConfig
     ) {
         this.view = view;
         this.timeView = timeView;
@@ -39,6 +41,7 @@ public class Habitat {
 
         this.redrawTimerService = redrawTimerService;
         this.spawnTimerService = spawnTimerService;
+        this.appConfig = appConfig;
 
         this.aiService = new AIService();
         this.aiService.use(Automobile.class, new AutomobileAI(this.vehicleRepository));
@@ -52,9 +55,12 @@ public class Habitat {
 
         this.spawnTimerService.start();
         this.redrawTimerService.start();
+        System.out.println("vehicle.automobile.useAI=" + this.appConfig.getProperty("vehicle.motorbike.useAI"));
 
-        this.aiService.resume(Automobile.class);
-        this.aiService.resume(Motorbike.class);
+        if (Boolean.parseBoolean(this.appConfig.getProperty("vehicle.automobile.useAI")))
+            this.aiService.resume(Automobile.class);
+        if (Boolean.parseBoolean(this.appConfig.getProperty("vehicle.motorbike.useAI")))
+            this.aiService.resume(Motorbike.class);
     }
 
     public void stop() {
@@ -82,8 +88,10 @@ public class Habitat {
         this.spawnTimerService.resume();
         this.redrawTimerService.resume();
 
-        this.aiService.resume(Automobile.class);
-        this.aiService.resume(Motorbike.class);
+        if (Boolean.parseBoolean(this.appConfig.getProperty("vehicle.automobile.useAI")))
+            this.aiService.resume(Automobile.class);
+        if (Boolean.parseBoolean(this.appConfig.getProperty("vehicle.motorbike.useAI")))
+            this.aiService.resume(Motorbike.class);
     }
 
     public void update(long timeOffset) {

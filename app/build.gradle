@@ -1,6 +1,7 @@
 plugins {
     id 'ru.nstu.vehicles.java-application-conventions'
     id 'org.openjfx.javafxplugin' version '0.0.13'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 dependencies {
@@ -12,6 +13,6 @@ application {
 }
 
 javafx {
-    version = '19'
+    version = '20'
     modules = ['javafx.controls', 'javafx.fxml']
 }
