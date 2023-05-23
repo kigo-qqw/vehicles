@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import ru.nstu.vehicles.app.model.Habitat;
 import ru.nstu.vehicles.app.model.dto.VehicleDto;
@@ -15,17 +16,19 @@ import ru.nstu.vehicles.app.model.entities.factories.MotorbikeFactory;
 import ru.nstu.vehicles.app.model.service.IVehicleSpawnerService;
 import ru.nstu.vehicles.app.model.service.ProbabilisticVehicleSpawnerService;
 import ru.nstu.vehicles.app.view.AboutDialogWindow;
+import ru.nstu.vehicles.app.view.ConsoleDialogWindow;
 import ru.nstu.vehicles.app.view.HabitatInfoDialogWindow;
 import ru.nstu.vehicles.app.view.components.HabitatView;
 import ru.nstu.vehicles.app.view.components.ProbabilisticVehicleStrategyParams;
 import ru.nstu.vehicles.app.view.components.TimeView;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -70,6 +73,12 @@ public class MainViewController implements IController {
     private ComboBox<Integer> automobileAIThreadPriorityComboBox;
     @FXML
     private ComboBox<Integer> motorbikeAIThreadPriorityComboBox;
+    @FXML
+    private Button openConsoleButton;
+    @FXML
+    private Button saveVehiclesButton;
+    @FXML
+    private Button loadVehiclesButton;
     private Habitat model = null;
     private final BooleanProperty isSimulationActive = new SimpleBooleanProperty(false);
     private final BooleanProperty isShowTime = new SimpleBooleanProperty(true);
@@ -180,7 +189,6 @@ public class MainViewController implements IController {
         this.timeView.visibleProperty().bind(this.isShowTime);
 
         this.automobileAICheckBox.setOnAction(event -> {
-            System.out.println("automobileAICheckBox: " + this.automobileAICheckBox.isSelected());
             if (this.automobileAICheckBox.isSelected()) this.model.resumeAI(Automobile.class);
             else this.model.pauseAI(Automobile.class);
 
@@ -216,6 +224,42 @@ public class MainViewController implements IController {
         this.motorbikeParams.setLifeTime(Integer.parseInt(this.appConfig.getProperty("vehicle.motorbike.lifeTime")));
         this.motorbikeParams.setChance(Integer.parseInt(this.appConfig.getProperty("vehicle.motorbike.spawnProbability")));
         this.motorbikeAICheckBox.setSelected(Boolean.parseBoolean(this.appConfig.getProperty("vehicle.motorbike.spawnProbability")));
+
+        this.openConsoleButton.setOnAction(event -> {
+            try {
+                new ConsoleDialogWindow(this.stage, this).run();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        FileChooser fileSaveChooser = new FileChooser();
+        fileSaveChooser.setTitle("Save");
+        fileSaveChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Vehicles", "*.vehicles"));
+
+        FileChooser fileOpenChooser = new FileChooser();
+        fileOpenChooser.setTitle("Open");
+        fileOpenChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Vehicles", "*.vehicles"));
+
+        this.saveVehiclesButton.setOnAction(event -> {
+            File file = fileSaveChooser.showSaveDialog(this.stage);
+            try {
+                new ObjectOutputStream(new FileOutputStream(file)).writeObject(this.getAllVehicles().collect(Collectors.toCollection(ArrayList::new)));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        this.loadVehiclesButton.setOnAction(event -> {
+            File file = fileOpenChooser.showOpenDialog(this.stage);
+            try {
+                ArrayList<VehicleDto> vehicleDtos = (ArrayList<VehicleDto>) new ObjectInputStream(new FileInputStream(file)).readObject();
+                this.model.setVehicles(vehicleDtos.stream().map(
+                        vehicleDto -> this.model.getVehicleService().get(vehicleDto, 640, 480)));
+            } catch (IOException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+
+        });
     }
 
     public HabitatView getHabitatView() {
@@ -238,5 +282,7 @@ public class MainViewController implements IController {
         return this.timeView;
     }
 
-
+    public int deleteMotorbikes(int percent) {
+        return this.model.deleteMotorbikes(percent);
+    }
 }

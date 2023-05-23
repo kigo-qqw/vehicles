@@ -55,8 +55,11 @@
 
             <CheckBox fx:id="automobileAICheckBox" text="Automobile AI" selected="true"/>
             <ComboBox fx:id="automobileAIThreadPriorityComboBox"/>
-            <CheckBox fx:id="motorbikeAICheckBox" text="Motorbike AI" selected="true"/>
+            <CheckBox fx:id="motorbikeAICheckBox" text="Motorbike AI" selected="true" />
             <ComboBox fx:id="motorbikeAIThreadPriorityComboBox"/>
+            <Button fx:id="openConsoleButton" text="console"/>
+            <Button fx:id="saveVehiclesButton" text="save vehicles"/>
+            <Button fx:id="loadVehiclesButton" text="load vehicles"/>
         </VBox>
     </HBox>
 

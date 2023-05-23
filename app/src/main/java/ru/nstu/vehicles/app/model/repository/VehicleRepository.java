@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class VehicleRepository implements IVehicleRepository {
@@ -27,8 +28,25 @@ public class VehicleRepository implements IVehicleRepository {
     }
 
     @Override
+    public int getLength() {
+        return this.vehicles.size();
+    }
+
+    @Override
     public Stream<Vehicle> getAll() {
         return this.vehicles.stream();
+    }
+
+    @Override
+    public void setAll(Stream<Vehicle> entities) {
+        this.vehicles = entities.collect(Collectors.toCollection(ArrayList::new));
+        this.vehicleUuids.clear();
+        this.vehiclesByBirthTime.clear();
+        this.vehicles.forEach(vehicle -> {
+            this.vehicleUuids.add(vehicle.getUuid());
+            this.vehiclesByBirthTime.put(vehicle.getBirthTime(), vehicle);
+        });
+        System.out.println(this.vehicles);
     }
 
     @Override
@@ -45,7 +63,7 @@ public class VehicleRepository implements IVehicleRepository {
         TreeMap<Long, Vehicle> newVehiclesByBirthTime = new TreeMap<>();
 
         this.vehicles.forEach(vehicle -> {
-            if (vehicle.getBirthTime() + vehicle.getLifeTime() > currentSimulationTime){
+            if (vehicle.getBirthTime() + vehicle.getLifeTime() > currentSimulationTime) {
                 newVehicles.add(vehicle);
                 newVehicleUuids.add(vehicle.getUuid());
                 newVehiclesByBirthTime.put(vehicle.getBirthTime(), vehicle);

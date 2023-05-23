@@ -5,4 +5,6 @@ import ru.nstu.vehicles.app.model.entities.Vehicle;
 
 public interface IVehicleService {
     VehicleDto get(Vehicle vehicle);
+
+    Vehicle get(VehicleDto vehicleDto, int habitatWidth, int habitatHeight);
 }

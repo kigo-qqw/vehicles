@@ -13,6 +13,7 @@ import ru.nstu.vehicles.app.view.components.ITimeView;
 
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public class Habitat {
@@ -55,7 +56,6 @@ public class Habitat {
 
         this.spawnTimerService.start();
         this.redrawTimerService.start();
-        System.out.println("vehicle.automobile.useAI=" + this.appConfig.getProperty("vehicle.motorbike.useAI"));
 
         if (Boolean.parseBoolean(this.appConfig.getProperty("vehicle.automobile.useAI")))
             this.aiService.resume(Automobile.class);
@@ -110,16 +110,43 @@ public class Habitat {
     }
 
     public <T extends Vehicle> void resumeAI(Class<T> type) {
-        System.out.println("resume: " + type);
         this.aiService.resume(type);
     }
 
     public <T extends Vehicle> void pauseAI(Class<T> type) {
-        System.out.println("pause: " + type);
         this.aiService.pause(type);
     }
 
     public <T extends Vehicle> void setAIPriority(Class<T> type, int priority) {
         this.aiService.setPriority(type, priority);
+    }
+
+    public int deleteMotorbikes(int percent) {
+        synchronized (this.vehicleRepository) {
+            int amount = (int) (((double) percent) / 100.f * this.vehicleRepository.getAll().filter(vehicle -> vehicle instanceof Motorbike).count());
+            AtomicInteger left = new AtomicInteger(amount);
+
+            this.vehicleRepository.setAll(this.vehicleRepository.getAll()
+                    .filter(vehicle -> {
+                        if (vehicle instanceof Motorbike) {
+                            boolean isEnough = left.get() == 0;
+                            if (!isEnough) left.decrementAndGet();
+                            System.out.println("left=" + left.get());
+                            return isEnough;
+                        }
+                        return true;
+                    }));
+            return amount;
+        }
+    }
+
+    public void setVehicles(Stream<Vehicle> vehicles) {
+        synchronized (this.vehicleRepository) {
+            this.vehicleRepository.setAll(vehicles);
+        }
+    }
+
+    public IVehicleService getVehicleService() {
+        return vehicleService;
     }
 }
