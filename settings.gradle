@@ -9,5 +9,6 @@
 
 rootProject.name = 'vehicles'
 include 'app'
+include 'server'
 
 

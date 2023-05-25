@@ -1,0 +1,13 @@
+plugins {
+    id 'ru.nstu.vehicles.java-application-conventions'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+dependencies {
+implementation project(path: ':app')
+}
+
+application {
+    mainModule = 'ru.nstu.vehicles.server'
+    mainClass = 'ru.nstu.vehicles.server.Main'
+}
