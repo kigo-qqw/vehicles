@@ -9,12 +9,8 @@ import ru.nstu.vehicles.app.controller.MainViewController;
 import ru.nstu.vehicles.app.model.Habitat;
 import ru.nstu.vehicles.app.model.repository.IVehicleRepository;
 import ru.nstu.vehicles.app.model.repository.VehicleRepository;
-import ru.nstu.vehicles.app.model.service.IVehicleService;
-import ru.nstu.vehicles.app.model.service.RedrawTimerService;
-import ru.nstu.vehicles.app.model.service.SpawnTimerService;
-import ru.nstu.vehicles.app.model.service.VehicleService;
+import ru.nstu.vehicles.app.model.service.*;
 
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Objects;
@@ -25,8 +21,11 @@ public class App extends Application {
     public void start(Stage primaryStage) throws IOException {
         Properties appConfig = new Properties();
         appConfig.load(Objects.requireNonNull(getClass().getResource("/ru/nstu/vehicles/application.properties")).openStream());
+        IServerUpdaterService serverUpdaterService = new ServerUpdaterService();
+
+
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/ru/nstu/vehicles/app/view/main-view.fxml"));
-        fxmlLoader.setControllerFactory(controllerClass -> new MainViewController(appConfig));
+        fxmlLoader.setControllerFactory(controllerClass -> new MainViewController(appConfig, serverUpdaterService));
         Scene scene = new Scene(fxmlLoader.load(), 1080, 720);
 
         MainViewController controller = fxmlLoader.getController();

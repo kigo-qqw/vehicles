@@ -1,7 +1,7 @@
 package ru.nstu.vehicles.app.dto;
 
 import java.io.Serializable;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
-public record NewConnectionDto(InetAddress address) implements Serializable {
+public record NewConnectionDto(InetSocketAddress address) implements Serializable {
 }

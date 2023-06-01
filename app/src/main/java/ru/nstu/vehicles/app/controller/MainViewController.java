@@ -2,27 +2,35 @@ package ru.nstu.vehicles.app.controller;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import ru.nstu.vehicles.app.dto.UploadVehiclesDto;
 import ru.nstu.vehicles.app.model.Habitat;
 import ru.nstu.vehicles.app.model.dto.VehicleDto;
 import ru.nstu.vehicles.app.model.entities.Automobile;
 import ru.nstu.vehicles.app.model.entities.Motorbike;
 import ru.nstu.vehicles.app.model.entities.factories.AutomobileFactory;
 import ru.nstu.vehicles.app.model.entities.factories.MotorbikeFactory;
+import ru.nstu.vehicles.app.model.service.IServerUpdaterService;
 import ru.nstu.vehicles.app.model.service.IVehicleSpawnerService;
 import ru.nstu.vehicles.app.model.service.ProbabilisticVehicleSpawnerService;
 import ru.nstu.vehicles.app.view.AboutDialogWindow;
 import ru.nstu.vehicles.app.view.ConsoleDialogWindow;
 import ru.nstu.vehicles.app.view.HabitatInfoDialogWindow;
+import ru.nstu.vehicles.app.view.components.ConnectionListView;
 import ru.nstu.vehicles.app.view.components.HabitatView;
 import ru.nstu.vehicles.app.view.components.ProbabilisticVehicleStrategyParams;
 import ru.nstu.vehicles.app.view.components.TimeView;
 
 import java.io.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,15 +87,21 @@ public class MainViewController implements IController {
     private Button saveVehiclesButton;
     @FXML
     private Button loadVehiclesButton;
+    @FXML
+    private ConnectionListView connectionListView;
+    @FXML
+    private Button uploadVehiclesToServerButton;
     private Habitat model = null;
     private final BooleanProperty isSimulationActive = new SimpleBooleanProperty(false);
     private final BooleanProperty isShowTime = new SimpleBooleanProperty(true);
     private final BooleanProperty isShowInfoModal = new SimpleBooleanProperty(true);
     private Stage stage;
     private final Properties appConfig;
+    private final IServerUpdaterService serverUpdaterService;
 
-    public MainViewController(Properties appConfig) {
+    public MainViewController(Properties appConfig, IServerUpdaterService serverUpdaterService) {
         this.appConfig = appConfig;
+        this.serverUpdaterService = serverUpdaterService;
     }
 
     public void startSimulation() {
@@ -258,7 +272,31 @@ public class MainViewController implements IController {
             } catch (IOException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
+        });
 
+        ObservableMap<InetSocketAddress, Boolean> addresses = FXCollections.observableHashMap();
+        this.connectionListView.bindConnectionMap(addresses);
+        this.connectionListView.setServerUpdaterService(this.serverUpdaterService);
+        this.serverUpdaterService.bindConnectedMap(addresses);
+
+        try {
+            this.serverUpdaterService.connect(
+                    InetAddress.getByName(this.appConfig.getProperty("server.address")),
+                    Integer.parseInt(this.appConfig.getProperty("server.port"))
+            );
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        this.uploadVehiclesToServerButton.setOnAction(event -> {
+            try {
+                this.serverUpdaterService.send(new UploadVehiclesDto(
+                        this.serverUpdaterService.getInetSocketAddress(),
+                        this.model.getAll().collect(Collectors.toCollection(ArrayList::new))
+                ));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         });
     }
 
@@ -268,6 +306,7 @@ public class MainViewController implements IController {
 
     public void setModel(Habitat model) {
         this.model = model;
+        this.serverUpdaterService.setModel(this.model);
     }
 
     public void setStage(Stage stage) {

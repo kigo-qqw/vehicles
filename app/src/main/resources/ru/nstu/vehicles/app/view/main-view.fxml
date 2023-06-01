@@ -7,6 +7,7 @@
 <?import ru.nstu.vehicles.app.view.components.HabitatView?>
 <?import ru.nstu.vehicles.app.view.components.ProbabilisticVehicleStrategyParams?>
 <?import ru.nstu.vehicles.app.view.components.TimeView?>
+<?import ru.nstu.vehicles.app.view.components.ConnectionListView?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:id="root"
@@ -60,6 +61,8 @@
             <Button fx:id="openConsoleButton" text="console"/>
             <Button fx:id="saveVehiclesButton" text="save vehicles"/>
             <Button fx:id="loadVehiclesButton" text="load vehicles"/>
+            <ConnectionListView fx:id="connectionListView" />
+            <Button fx:id="uploadVehiclesToServerButton" text="upload vehicles to server"/>
         </VBox>
     </HBox>
 

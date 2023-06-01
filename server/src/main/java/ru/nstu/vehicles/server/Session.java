@@ -1,10 +1,14 @@
 package ru.nstu.vehicles.server;
 
+import ru.nstu.vehicles.app.dto.ExistingConnectionsDto;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.stream.Collectors;
 
 public class Session implements Runnable {
     private final Socket socket;
@@ -12,6 +16,7 @@ public class Session implements Runnable {
     private final ObjectInputStream in;
     private final ObjectOutputStream out;
     private final Dispatcher dispatcher;
+//    private ExistingConnectionsDto startMessage;
 
     public Session(Socket socket, Server server, Dispatcher dispatcher) throws IOException {
         this.socket = socket;
@@ -21,16 +26,30 @@ public class Session implements Runnable {
         this.dispatcher = dispatcher;
     }
 
+//    public void setStartMessage(ExistingConnectionsDto startMessage) {
+//        this.startMessage = startMessage;
+//    }
+
     public void run() {
         try {
+            Thread.sleep(1000);
+
+            this.out.writeObject(new ExistingConnectionsDto(
+                    this.dispatcher.getSessions().stream().collect(Collectors.toMap(
+                            Session::getInetSocketAddress,
+                            s -> this.dispatcher.getVehicleRepository().get(s.getInetSocketAddress()).isPresent()
+                    ))
+            ));
             while (true) {
                 Object data = this.in.readObject();
                 this.dispatcher.dispatch(this, data);
             }
         } catch (IOException | ClassNotFoundException ignored) {
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         } finally {
             try {
-                this.server.disconnect(socket.getInetAddress());
+                this.server.disconnect(new InetSocketAddress(socket.getInetAddress(), socket.getPort()));
                 this.in.close();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -42,12 +61,11 @@ public class Session implements Runnable {
         try {
             this.out.writeObject(object);
         } catch (IOException e) {
-            this.server.disconnect(socket.getInetAddress());
-            throw new RuntimeException(e);
+            this.server.disconnect(new InetSocketAddress(socket.getInetAddress(), socket.getPort()));
         }
     }
 
-    public InetAddress getInetAddress(){
-        return this.socket.getInetAddress();
+    public InetSocketAddress getInetSocketAddress() {
+        return new InetSocketAddress(this.socket.getInetAddress(), this.socket.getPort());
     }
 }
