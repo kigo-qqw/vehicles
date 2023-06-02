@@ -1,6 +1,7 @@
 module ru.nstu.vehicles.app {
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.sql;
 
 //    opens ru.nstu.vehicles.app to javafx.fxml;
     opens ru.nstu.vehicles.app.controller to javafx.fxml;

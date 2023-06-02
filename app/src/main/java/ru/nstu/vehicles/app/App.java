@@ -13,12 +13,15 @@ import ru.nstu.vehicles.app.model.service.*;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Properties;
 
 public class App extends Application {
     @Override
-    public void start(Stage primaryStage) throws IOException {
+    public void start(Stage primaryStage) throws IOException, SQLException {
         Properties appConfig = new Properties();
         appConfig.load(Objects.requireNonNull(getClass().getResource("/ru/nstu/vehicles/application.properties")).openStream());
         IServerUpdaterService serverUpdaterService = new ServerUpdaterService();
@@ -30,7 +33,9 @@ public class App extends Application {
 
         MainViewController controller = fxmlLoader.getController();
 
-        IVehicleRepository vehicleRepository = new VehicleRepository();
+        System.out.println(appConfig.getProperty("jdbc.url"));
+        Connection connection = DriverManager.getConnection(appConfig.getProperty("jdbc.url"));
+        IVehicleRepository vehicleRepository = new VehicleRepository(connection);
         IVehicleService vehicleService = new VehicleService();
         Habitat model = new Habitat(
                 controller.getHabitatView(),
