@@ -4,7 +4,7 @@ import ru.nstu.vehicles.app.model.dto.VehicleDto;
 
 import java.io.Serializable;
 import java.net.InetSocketAddress;
-import java.util.List;
+import java.util.ArrayList;
 
-public record UploadVehiclesDto(InetSocketAddress address, List<VehicleDto> vehicles) implements Serializable {
+public record UploadVehiclesDto(InetSocketAddress address, ArrayList<VehicleDto> vehicles) implements Serializable {
 }

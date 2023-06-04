@@ -11,3 +11,13 @@ application {
     mainModule = 'ru.nstu.vehicles.server'
     mainClass = 'ru.nstu.vehicles.server.Main'
 }
+
+jar {
+    manifest {
+        attributes 'Main-Class': application.mainClass
+    }
+}
+shadowJar {
+    archiveFileName = "server-all.jar"
+}
+

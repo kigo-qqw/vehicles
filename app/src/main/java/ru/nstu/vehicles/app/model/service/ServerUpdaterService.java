@@ -59,6 +59,7 @@ public class ServerUpdaterService implements IServerUpdaterService {
 
     @Override
     public void send(Object object) throws IOException {
+        System.out.println(object);
         this.oos.writeObject(object);
     }
 

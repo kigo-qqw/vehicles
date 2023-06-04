@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 public class Session implements Runnable {
@@ -35,10 +36,10 @@ public class Session implements Runnable {
             Thread.sleep(1000);
 
             this.out.writeObject(new ExistingConnectionsDto(
-                    this.dispatcher.getSessions().stream().collect(Collectors.toMap(
+                    new HashMap<>(this.dispatcher.getSessions().stream().collect(Collectors.toMap(
                             Session::getInetSocketAddress,
                             s -> this.dispatcher.getVehicleRepository().get(s.getInetSocketAddress()).isPresent()
-                    ))
+                    )))
             ));
             while (true) {
                 Object data = this.in.readObject();
@@ -49,7 +50,7 @@ public class Session implements Runnable {
             throw new RuntimeException(e);
         } finally {
             try {
-                this.server.disconnect(new InetSocketAddress(socket.getInetAddress(), socket.getPort()));
+                this.server.disconnect((InetSocketAddress) this.socket.getRemoteSocketAddress());
                 this.in.close();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -61,11 +62,12 @@ public class Session implements Runnable {
         try {
             this.out.writeObject(object);
         } catch (IOException e) {
-            this.server.disconnect(new InetSocketAddress(socket.getInetAddress(), socket.getPort()));
+            this.server.disconnect((InetSocketAddress) this.socket.getRemoteSocketAddress());
         }
     }
 
     public InetSocketAddress getInetSocketAddress() {
-        return new InetSocketAddress(this.socket.getInetAddress(), this.socket.getPort());
+        return (InetSocketAddress)this.socket.getRemoteSocketAddress();
+//        return new InetSocketAddress(this.socket.getInetAddress(), this.socket.getPort());
     }
 }

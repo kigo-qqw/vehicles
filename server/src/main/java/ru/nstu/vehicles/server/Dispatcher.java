@@ -3,6 +3,7 @@ package ru.nstu.vehicles.server;
 import ru.nstu.vehicles.app.dto.*;
 import ru.nstu.vehicles.app.model.dto.VehicleDto;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +25,7 @@ public class Dispatcher {
         if (object instanceof DownloadVehiclesRequestDto downloadVehiclesRequest) {
             Optional<List<VehicleDto>> optionalVehicles = this.vehicleRepository.get(downloadVehiclesRequest.address());
             optionalVehicles.ifPresent(
-                    vehicles -> session.send(new DownloadVehiclesResponseDto(vehicles)));
+                    vehicles -> session.send(new DownloadVehiclesResponseDto(new ArrayList<>(vehicles))));
         }
     }
 
